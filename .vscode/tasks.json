@@ -10,11 +10,11 @@
         "-std=c++17",
         "-I${workspaceFolder}/include",
         "-L${workspaceFolder}/lib",
-        "${workspaceFolder}/src/App/main.cpp",
+        "${file}",
         "${workspaceFolder}/src/glad.c",
         "-lglfw3dll",
         "-o",
-        "${workspaceFolder}/main.exe"
+        "${workspaceFolder}/${fileBasenameNoExtension}.exe"
       ],
       "options": {
         "cwd": "${workspaceFolder}"
