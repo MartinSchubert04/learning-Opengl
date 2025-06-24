@@ -2,9 +2,9 @@
 
 Clonar repositorio e instalar compilador g++
 
-Modificar ruta de g++ es tasks.json y verificar routa de main, en caso de querer moverlo de lugar se debe cambiar la ruta de compilacion
+Modificar ruta de g++ es tasks.json y verificar routa de main, actualmente compila el codigo ejecutado directamente. En caso de tener errores de compilacion verificar el "${file}" y "${workspaceFolder}/${fileBasenameNoExtension}.exe" (podria no estar encontrando el codigo ejecutado a compilar)
 
-![image](https://github.com/user-attachments/assets/5b1a2b6e-1b52-4a74-825d-c8555795fc70)
+![image](https://github.com/user-attachments/assets/582c96bd-dfa6-4e46-9c44-aa428d2e5f39)
 
 ejecutar codigo de prueba
 
