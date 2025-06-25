@@ -25,6 +25,18 @@
         "isDefault": true
       },
       "detail": "compiler: C:/msys64/ucrt64/bin/g++.exe"
+    },
+    {
+      "label": "Clean EXE files",
+      "type": "shell",
+      "command": "Remove-Item -Path *.exe -Force",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "none"
+      }
     }
   ]
 }
