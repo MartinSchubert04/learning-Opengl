@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.10)
+project(OpenGLProject)
+
+set(CMAKE_CXX_STANDARD 17)
+
+# Archivos fuente
+file(GLOB_RECURSE SOURCES
+    src/*.cpp
+    src/*.c
+)
+
+# Ejecutable
+add_executable(OpenGLApp ${SOURCES})
+
+# Incluye headers
+target_include_directories(OpenGLApp PRIVATE
+    ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/src
+)
+
+# Linkeo de librerías
+link_directories(${PROJECT_SOURCE_DIR}/lib)
+target_link_libraries(OpenGLApp glfw3dll opengl32)
+
+# Copiar shaders a build al compilar (opcional)
+file(COPY ${PROJECT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR}/)

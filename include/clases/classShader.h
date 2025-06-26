@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <direct.h>
+
 class Shader
 {
 public:
@@ -16,6 +18,12 @@ public:
     // ------------------------------------------------------------------------
     Shader(const char* vertexPath, const char* fragmentPath)
     {
+
+        char buffer[256];
+        _getcwd(buffer, 256);
+        std::cout << "Working directory: " << buffer << std::endl;
+        std::cout << "Vertex shader path: " << vertexPath << std::endl;
+        std::cout << "Fragment shader path: " << fragmentPath << std::endl;
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
         std::string fragmentCode;

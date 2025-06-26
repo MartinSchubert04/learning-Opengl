@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-//#include "shaderClass.h"
+#include <clases/classShader.h>
 
 #include <iostream>
 
@@ -16,6 +16,7 @@ int main()
 {
     // glfw: initialize and configure
     // ------------------------------
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -47,7 +48,7 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-    // Shader ourShader("3.3.shader.vs", "3.3.shader.fs"); // you can name your shader files however you like
+    Shader ourShader("shaders/shader.vs", "shaders/shader.fs"); // you can name your shader files however you like
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -78,6 +79,8 @@ int main()
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     // glBindVertexArray(0);
 
+    float offset = 0.5f;
+    ourShader.setFloat("xOffset", offset);
 
     // render loop
     // -----------

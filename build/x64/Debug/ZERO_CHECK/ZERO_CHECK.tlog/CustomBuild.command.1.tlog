@@ -1,0 +1,10 @@
+^C:\USERS\MARTIN SCHUBERT\DESKTOP\FACULTAD\OPENGL\BUILD\CMAKEFILES\5CC15CEA66BD6CCB45345D76187DCECD\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SC:/Users/Martin Schubert/Desktop/Facultad/Opengl" "-BC:/Users/Martin Schubert/Desktop/Facultad/Opengl/build" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "C:/Users/Martin Schubert/Desktop/Facultad/Opengl/build/OpenGLProject.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
