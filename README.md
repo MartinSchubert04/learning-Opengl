@@ -1,4 +1,4 @@
-# Learnin opengl
+# Learning opengl
 
 For setup referece [here](https://github.com/MartinSchubert04/Opengl-setup)
 

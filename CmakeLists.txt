@@ -1,26 +1,23 @@
-cmake_minimum_required(VERSION 3.10)
-project(OpenGLProject)
+cmake_minimum_required(VERSION 3.126)
+project(OpenGL-learn)
+cmake_policy(SET CMP0072 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# Archivos fuente
-file(GLOB_RECURSE SOURCES
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
     src/*.cpp
-    src/*.c
+    src/glad.c
 )
 
-# Ejecutable
-add_executable(OpenGLApp ${SOURCES})
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
 
-# Incluye headers
-target_include_directories(OpenGLApp PRIVATE
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/src
+add_executable(OpenGL-learn
+    ${SOURCES}
 )
 
-# Linkeo de librerías
-link_directories(${PROJECT_SOURCE_DIR}/lib)
-target_link_libraries(OpenGLApp glfw3dll opengl32)
+target_include_directories(OpenGL-learn PRIVATE include lib shaders)
 
-# Copiar shaders a build al compilar (opcional)
-file(COPY ${PROJECT_SOURCE_DIR}/shaders DESTINATION ${CMAKE_BINARY_DIR}/)
+
+target_link_libraries(OpenGL-learn ${GLFW3_LIBRARY} OpenGL::GL)
