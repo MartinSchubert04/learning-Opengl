@@ -48,7 +48,7 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-    Shader ourShader("../../shaders/shader.vs", "../../shaders/shader.fs"); // you can name your shader files however you like
+    Shader ourShader("shaders/shader.vs", "shaders/shader.fs"); // you can name your shader files however you like
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -79,9 +79,6 @@ int main()
     // VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
     // glBindVertexArray(0);
 
-    float offset = 0.5f;
-    ourShader.setFloat("xOffset", offset);
-
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -89,7 +86,8 @@ int main()
         // input
         // -----
         processInput(window);
-
+        float offset = 0.5f;
+        ourShader.setFloat("xOffset", offset);
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
