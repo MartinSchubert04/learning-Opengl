@@ -6,18 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 
-file(GLOB SHADER_FILES
-    ${CMAKE_SOURCE_DIR}/shaders/*.glsl
-)
-
-foreach(shader_file ${SHADER_FILES})
-    add_custom_command(TARGET OpenGL-learn POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${shader_file}
-            $<TARGET_FILE_DIR:OpenGL-learn>/shaders/
-    )
-endforeach()
-
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
@@ -27,11 +15,6 @@ add_executable(OpenGL-learn
     ${SOURCE_FILE}
     src/glad.c
 )
-
-
-# add_executable(OpenGL-learn
-#     ${SOURCES}
-# )
 
 target_include_directories(OpenGL-learn PRIVATE include lib shaders)
 

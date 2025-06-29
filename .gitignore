@@ -1,1 +1,6 @@
+# Ignore build directory
+/build/
+# Ignore bin directory
+/bin/
+# Ignore .exe
 *.exe
