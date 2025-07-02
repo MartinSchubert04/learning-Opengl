@@ -50,7 +50,7 @@ int main()
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader ourShader("shaders/3.6-shaderTexture.vs", "shaders/3.6-shaderTexture.fs");
+    Shader ourShader("shaders/3/3.6-shaderTexture.vs", "shaders/3/3.6-shaderTexture.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------

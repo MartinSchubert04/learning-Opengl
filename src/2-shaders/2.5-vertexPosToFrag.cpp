@@ -48,7 +48,7 @@ int main()
 
     // build and compile our shader program
     // ------------------------------------
-    Shader ourShader("shaders/2.5-shader.vs", "shaders/2.5-shader.fs"); // you can name your shader files however you like
+    Shader ourShader("shaders/2/2.5-shader.vs", "shaders/2/2.5-shader.fs"); // you can name your shader files however you like
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
