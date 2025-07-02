@@ -9,7 +9,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
-set(SOURCE_FILE src/2-shaders/2.5-vertexPosToFrag.cpp)
+set(SOURCE_FILE src/3-textures/3.7-textureExercise.cpp)
 
 add_executable(OpenGL-learn
     ${SOURCE_FILE}
