@@ -4,12 +4,12 @@ cmake_policy(SET CMP0072 NEW)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/)
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
-set(SOURCE_FILE src/5-coordinates/5.3-cubes.cpp)
+set(SOURCE_FILE src/5-coordinates/5.1-coorTypes.cpp)
 
 add_executable(OpenGL-learn
     ${SOURCE_FILE}

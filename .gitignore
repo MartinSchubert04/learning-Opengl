@@ -4,3 +4,4 @@
 /bin/
 # Ignore .exe
 *.exe
+*.pdb
