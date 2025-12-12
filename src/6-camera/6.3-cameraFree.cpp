@@ -1,6 +1,7 @@
+#include "ext/matrix_transform.hpp"
+#include "geometric.hpp"
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <Glad/glad.h>
-
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -20,8 +21,13 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float moveY = 0.0;
-float moveX = 0.0;
+float deltaTime = 0.0f; // Time between current frame and last frame
+float lastFrame = 0.0f; // Time of last frame
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 center = glm::vec3(0, 0, 0);
 
 int main() {
   // glfw: initialize and configure
@@ -172,6 +178,8 @@ int main() {
       glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
       glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
 
+  float previousTime = glfwGetTime();
+  int frameCount = 0;
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
@@ -190,6 +198,23 @@ int main() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    frameCount++;
+
+    // Actualizar cada 0.25 segundos
+    if (currentFrame - previousTime >= 0.25) {
+      float fps = frameCount / (currentFrame - previousTime);
+
+      std::string newTitle = "LearnOpenGL - FPS: " + std::to_string((int)fps);
+      glfwSetWindowTitle(window, newTitle.c_str());
+
+      previousTime = currentFrame;
+      frameCount = 0;
+    }
+
     ourShader.use();
 
     // create model matrix
@@ -198,10 +223,11 @@ int main() {
                         glm::vec3(0.5f, 1.0f, 0.0f));
 
     // create view matrix
-    glm::mat4 view = glm::mat4(1.0f);
+
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
     // note that we're translating the scene in the reverse direction of where
     // we want to move
-    view = glm::translate(view, glm::vec3(moveX, moveY, -3.0f));
 
     // create projection matrix
     glm::mat4 projection;
@@ -263,19 +289,28 @@ int main() {
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
+
+  float cameraSpeed = 2.5f * deltaTime;
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    moveY -= 0.01;
+    cameraPos += cameraSpeed * cameraFront;
   if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    moveY += 0.01;
+    cameraPos -= cameraSpeed * cameraFront;
 
   if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-    moveX -= 0.01;
+    cameraPos +=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
   if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-    moveX += 0.01;
+    cameraPos -=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraUp;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraUp;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback

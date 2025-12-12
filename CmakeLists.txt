@@ -18,7 +18,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 
-set(SOURCE_FILE src/5-coordinates/5.1-coorTypes.cpp)
+set(SOURCE_FILE src/6-camera/6.3-cameraFree.cpp)
 
 add_executable(OpenGL-learn
     ${SOURCE_FILE}
