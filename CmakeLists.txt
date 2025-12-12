@@ -1,13 +1,22 @@
-cmake_minimum_required(VERSION 3.126)
+cmake_minimum_required(VERSION 3.22)
 project(OpenGL-learn)
 cmake_policy(SET CMP0072 NEW)
 
+
+include_directories(include)
+include_directories(include/glad)
+include_directories(include/GLFW)
+include_directories(include/glm)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR}/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+
 
 set(SOURCE_FILE src/5-coordinates/5.1-coorTypes.cpp)
 
@@ -18,5 +27,6 @@ add_executable(OpenGL-learn
 
 target_include_directories(OpenGL-learn PRIVATE include lib shaders)
 
+target_link_libraries(OpenGL-learn PRIVATE ${PROJECT_SOURCE_DIR}/lib/libglfw3.a)
 
-target_link_libraries(OpenGL-learn ${GLFW3_LIBRARY} OpenGL::GL)
+# target_link_libraries(OpenGL-learn ${GLFW3_LIBRARY} OpenGL::GL)

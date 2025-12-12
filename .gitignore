@@ -5,3 +5,4 @@
 # Ignore .exe
 *.exe
 *.pdb
+.chache/
