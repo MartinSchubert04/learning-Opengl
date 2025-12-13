@@ -12,10 +12,10 @@
 
 #include <clases/shader_class2.h>
 
-#include <iostream>
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -23,6 +23,12 @@ const unsigned int SCR_HEIGHT = 600;
 
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrame = 0.0f; // Time of last frame
+
+float lastX = float(SCR_WIDTH) / 2, lastY = float(SCR_HEIGHT) / 2;
+float yaw = -90.0;
+float pitch = 0.0;
+bool firstMouse = true;
+float fov = 45.0f;
 
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -180,6 +186,9 @@ int main() {
 
   float previousTime = glfwGetTime();
   int frameCount = 0;
+
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
@@ -222,7 +231,9 @@ int main() {
     model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f),
                         glm::vec3(0.5f, 1.0f, 0.0f));
 
-    // create view matrix
+    // mouse input callbacks
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
 
     glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
@@ -231,9 +242,8 @@ int main() {
 
     // create projection matrix
     glm::mat4 projection;
-    projection =
-        glm::perspective(glm::radians(45.0f),
-                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    projection = glm::perspective(
+        glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     // get matrix's uniform location and set matrix
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
@@ -295,22 +305,63 @@ void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
 
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     cameraPos += cameraSpeed * cameraFront;
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     cameraPos -= cameraSpeed * cameraFront;
 
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     cameraPos +=
         glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     cameraPos -=
         glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
   if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
     cameraPos += cameraSpeed * cameraUp;
   if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     cameraPos -= cameraSpeed * cameraUp;
+}
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+
+  if (firstMouse) // initially set to true
+  {
+    lastX = xpos;
+    lastY = ypos;
+    firstMouse = false;
+  }
+  float xOffset = xpos - lastX;
+  float yOffset = lastY - ypos;
+  lastX = xpos;
+  lastY = ypos;
+
+  const float sensitivity = 0.1;
+  yOffset *= sensitivity;
+  xOffset *= sensitivity;
+
+  yaw += xOffset;
+  pitch += yOffset;
+
+  if (pitch > 89.0f)
+    pitch = 89.0f;
+  if (pitch < -89.0f)
+    pitch = -89.0f;
+
+  glm::vec3 direction;
+  // Note that we convert the angle to radians first
+  direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+  direction.y = sin(glm::radians(pitch));
+  direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+  cameraFront = glm::normalize(direction);
+}
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  fov -= (float)yoffset;
+  if (fov < 1.0f)
+    fov = 1.0f;
+  if (fov > 45.0f)
+    fov = 45.0f;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
