@@ -1,5 +1,8 @@
+#include "ext/matrix_transform.hpp"
+#include "geometric.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -9,14 +12,28 @@
 
 #include <clases/Shader.h>
 
-#include <iostream>
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+float deltaTime = 0.0f;  // Time between current frame and last frame
+float lastFrame = 0.0f;  // Time of last frame
+
+float lastX = float(SCR_WIDTH) / 2, lastY = float(SCR_HEIGHT) / 2;
+float yaw = -90.0;
+float pitch = 0.0;
+bool firstMouse = true;
+float fov = 45.0f;
+
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::vec3 center = glm::vec3(0, 0, 0);
 
 int main() {
   // glfw: initialize and configure
@@ -143,8 +160,8 @@ int main() {
   data = stbi_load("resources/textures/awesomeface.png", &width, &height,
                    &nrChannels, 0);
   if (data) {
-    // note that the awesomeface.png has transparency and thus an alpha channel,
-    // so make sure to tell OpenGL the data type is of GL_RGBA
+    // note that the awesomeface.png has transparency and thus an alpha
+    // channel, so make sure to tell OpenGL the data type is of GL_RGBA
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -153,12 +170,24 @@ int main() {
   }
   stbi_image_free(data);
 
-  // tell opengl for each sampler to which texture unit it belongs to (only has
-  // to be done once)
+  // tell opengl for each sampler to which texture unit it belongs to (only
+  // has to be done once)
   // -------------------------------------------------------------------------------------------
   ourShader.use();
   ourShader.setInt("texture1", 0);
   ourShader.setInt("texture2", 1);
+
+  glm::vec3 cubePositions[] = {
+      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
+      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+
+  float previousTime = glfwGetTime();
+  int frameCount = 0;
+
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // render loop
   // -----------
@@ -178,6 +207,23 @@ int main() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
+    float currentFrame = glfwGetTime();
+    deltaTime = currentFrame - lastFrame;
+    lastFrame = currentFrame;
+
+    frameCount++;
+
+    // Actualizar cada 0.25 segundos
+    if (currentFrame - previousTime >= 0.25) {
+      float fps = frameCount / (currentFrame - previousTime);
+
+      std::string newTitle = "LearnOpenGL - FPS: " + std::to_string((int)fps);
+      glfwSetWindowTitle(window, newTitle.c_str());
+
+      previousTime = currentFrame;
+      frameCount = 0;
+    }
+
     ourShader.use();
 
     // create model matrix
@@ -185,17 +231,19 @@ int main() {
     model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f),
                         glm::vec3(0.5f, 1.0f, 0.0f));
 
-    // create view matrix
-    glm::mat4 view = glm::mat4(1.0f);
-    // note that we're translating the scene in the reverse direction of where
-    // we want to move
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+    // mouse input callbacks
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+    // note that we're translating the scene in the reverse direction of
+    // where we want to move
 
     // create projection matrix
     glm::mat4 projection;
-    projection =
-        glm::perspective(glm::radians(45.0f),
-                         (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    projection = glm::perspective(
+        glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     // get matrix's uniform location and set matrix
     unsigned int modelLoc = glGetUniformLocation(ourShader.ID, "model");
@@ -208,10 +256,28 @@ int main() {
 
     // render container
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 
-    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
-    // etc.)
+    for (unsigned int i = 0; i < 10; i++) {
+      glm::mat4 model = glm::mat4(1.0f);
+      model = glm::translate(model, cubePositions[i]);
+      float angle = 20.0f * i;
+
+      if (i % 3 == 0)
+        angle = 25.0f * glfwGetTime();  // lo redefino porque si no el
+                                        // primero no se mueve, en la primera
+                                        // iter se define el angle como 20.0f
+                                        // * 0 (si multiplico por glfwGetTime
+                                        // igual da 0 por ende no se mueve)
+
+      model =
+          glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+      ourShader.setMat4("model", model);
+
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
+    // glfw: swap buffers and poll IO events (keys pressed/released, mouse
+    // moved etc.)
     // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -233,8 +299,69 @@ int main() {
 // frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
+
+  float cameraSpeed = 2.5f * deltaTime;
+
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraFront;
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraFront;
+
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    cameraPos +=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    cameraPos -=
+        glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+    cameraPos += cameraSpeed * cameraUp;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    cameraPos -= cameraSpeed * cameraUp;
+}
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+
+  if (firstMouse)  // initially set to true
+  {
+    lastX = xpos;
+    lastY = ypos;
+    firstMouse = false;
+  }
+  float xOffset = xpos - lastX;
+  float yOffset = lastY - ypos;
+  lastX = xpos;
+  lastY = ypos;
+
+  const float sensitivity = 0.1;
+  yOffset *= sensitivity;
+  xOffset *= sensitivity;
+
+  yaw += xOffset;
+  //   pitch += yOffset;
+
+  if (pitch > 89.0f)
+    pitch = 89.0f;
+  if (pitch < -89.0f)
+    pitch = -89.0f;
+
+  glm::vec3 direction;
+  // Note that we convert the angle to radians first
+  direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+  direction.y = sin(glm::radians(pitch));
+  direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+  cameraFront = glm::normalize(direction);
+}
+
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  fov -= (float)yoffset;
+  if (fov < 1.0f)
+    fov = 1.0f;
+  if (fov > 45.0f)
+    fov = 45.0f;
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback
@@ -242,6 +369,7 @@ void processInput(GLFWwindow *window) {
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   // make sure the viewport matches the new window dimensions; note that width
-  // and height will be significantly larger than specified on retina displays.
+  // and height will be significantly larger than specified on retina
+  // displays.
   glViewport(0, 0, width, height);
 }

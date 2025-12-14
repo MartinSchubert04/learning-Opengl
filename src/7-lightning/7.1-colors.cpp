@@ -1,5 +1,7 @@
+#include "ext/matrix_transform.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -8,15 +10,27 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <clases/Shader.h>
-
-#include <iostream>
+#include <clases/Camera.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
-
+void mouse_callback(GLFWwindow *window, double xpos, double ypos);
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void updateFrameRate(GLFWwindow *window);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+float deltaTime = 0.0f;  // Time between current frame and last frame
+float lastFrame = 0.0f;  // Time of last frame
+bool firstMouse = true;
+
+float previousTime = glfwGetTime();
+int frameCount = 0;
+
+float lastX = float(SCR_WIDTH) / 2, lastY = float(SCR_HEIGHT) / 2;
+
+Camera camera(glm::vec3(0.0, 0.0, 3.0));
 
 int main() {
   // glfw: initialize and configure
@@ -160,6 +174,15 @@ int main() {
   ourShader.setInt("texture1", 0);
   ourShader.setInt("texture2", 1);
 
+  glm::vec3 cubePositions[] = {
+      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
+      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
+
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
@@ -178,6 +201,8 @@ int main() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
 
+    updateFrameRate(window);
+
     ourShader.use();
 
     // create model matrix
@@ -185,16 +210,20 @@ int main() {
     model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f),
                         glm::vec3(0.5f, 1.0f, 0.0f));
 
-    // create view matrix
-    glm::mat4 view = glm::mat4(1.0f);
+    // mouse input callbacks
+    glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+
+    glm::mat4 view =
+        glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
+
     // note that we're translating the scene in the reverse direction of where
     // we want to move
-    view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
     // create projection matrix
     glm::mat4 projection;
     projection =
-        glm::perspective(glm::radians(45.0f),
+        glm::perspective(glm::radians(camera.Zoom),
                          (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     // get matrix's uniform location and set matrix
@@ -208,7 +237,25 @@ int main() {
 
     // render container
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+
+    for (unsigned int i = 0; i < 10; i++) {
+      glm::mat4 model = glm::mat4(1.0f);
+      model = glm::translate(model, cubePositions[i]);
+      float angle = 20.0f * i;
+
+      if (i % 3 == 0)
+        angle = 25.0f *
+                glfwGetTime();  // lo redefino porque si no el primero no se
+                                // mueve, en la primera iter se define el angle
+                                // como 20.0f * 0 (si multiplico por glfwGetTime
+                                // igual da 0 por ende no se mueve)
+
+      model =
+          glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+      ourShader.setMat4("model", model);
+
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
@@ -235,8 +282,60 @@ int main() {
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
+
+  if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    camera.ProcessKeyboard(FORWARD, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    camera.ProcessKeyboard(BACKWARD, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    camera.ProcessKeyboard(LEFT, deltaTime);
+  if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    camera.ProcessKeyboard(RIGHT, deltaTime);
 }
 
+void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
+  float xpos = static_cast<float>(xposIn);
+  float ypos = static_cast<float>(yposIn);
+
+  if (firstMouse) {
+    lastX = xpos;
+    lastY = ypos;
+    firstMouse = false;
+  }
+
+  float xoffset = xpos - lastX;
+  float yoffset =
+      lastY - ypos;  // reversed since y-coordinates go from bottom to top
+
+  lastX = xpos;
+  lastY = ypos;
+
+  camera.ProcessMouseMovement(xoffset, yoffset);
+}
+
+// glfw: whenever the mouse scroll wheel scrolls, this callback is called
+// ----------------------------------------------------------------------
+void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
+  camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void updateFrameRate(GLFWwindow *window) {
+  float currentFrame = glfwGetTime();
+  deltaTime = currentFrame - lastFrame;
+  lastFrame = currentFrame;
+  frameCount++;
+
+  // Actualizar cada 0.25 segundos
+  if (currentFrame - previousTime >= 0.25) {
+    float fps = frameCount / (currentFrame - previousTime);
+
+    std::string newTitle = "LearnOpenGL - FPS: " + std::to_string((int)fps);
+    glfwSetWindowTitle(window, newTitle.c_str());
+
+    previousTime = currentFrame;
+    frameCount = 0;
+  }
+}
 // glfw: whenever the window size changed (by OS or user resize) this callback
 // function executes
 // ---------------------------------------------------------------------------------------------

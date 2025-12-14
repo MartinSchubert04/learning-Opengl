@@ -10,7 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <clases/shader_class2.h>
+#include <clases/Shader.h>
 
 #include <iostream>
 
@@ -130,7 +130,7 @@ int main() {
   // load image, create texture and generate mipmaps
   int width, height, nrChannels;
   stbi_set_flip_vertically_on_load(
-      true); // tell stb_image.h to flip loaded texture's on the y-axis.
+      true);  // tell stb_image.h to flip loaded texture's on the y-axis.
   unsigned char *data = stbi_load("resources/textures/container.jpg", &width,
                                   &height, &nrChannels, 0);
   if (data) {
@@ -252,10 +252,10 @@ int main() {
 
       if (i % 3 == 0)
         angle = 25.0f *
-                glfwGetTime(); // lo redefino porque si no el primero no se
-                               // mueve, en la primera iter se define el angle
-                               // como 20.0f * 0 (si multiplico por glfwGetTime
-                               // igual da 0 por ende no se mueve)
+                glfwGetTime();  // lo redefino porque si no el primero no se
+                                // mueve, en la primera iter se define el angle
+                                // como 20.0f * 0 (si multiplico por glfwGetTime
+                                // igual da 0 por ende no se mueve)
 
       model =
           glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));

@@ -10,7 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <clases/shader_class2.h>
+#include <clases/Shader.h>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -21,8 +21,8 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
+float deltaTime = 0.0f;  // Time between current frame and last frame
+float lastFrame = 0.0f;  // Time of last frame
 
 float lastX = float(SCR_WIDTH) / 2, lastY = float(SCR_HEIGHT) / 2;
 float yaw = -90.0;
@@ -135,7 +135,7 @@ int main() {
   // load image, create texture and generate mipmaps
   int width, height, nrChannels;
   stbi_set_flip_vertically_on_load(
-      true); // tell stb_image.h to flip loaded texture's on the y-axis.
+      true);  // tell stb_image.h to flip loaded texture's on the y-axis.
   unsigned char *data = stbi_load("resources/textures/container.jpg", &width,
                                   &height, &nrChannels, 0);
   if (data) {
@@ -264,10 +264,10 @@ int main() {
 
       if (i % 3 == 0)
         angle = 25.0f *
-                glfwGetTime(); // lo redefino porque si no el primero no se
-                               // mueve, en la primera iter se define el angle
-                               // como 20.0f * 0 (si multiplico por glfwGetTime
-                               // igual da 0 por ende no se mueve)
+                glfwGetTime();  // lo redefino porque si no el primero no se
+                                // mueve, en la primera iter se define el angle
+                                // como 20.0f * 0 (si multiplico por glfwGetTime
+                                // igual da 0 por ende no se mueve)
 
       model =
           glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
@@ -325,7 +325,7 @@ void processInput(GLFWwindow *window) {
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
 
-  if (firstMouse) // initially set to true
+  if (firstMouse)  // initially set to true
   {
     lastX = xpos;
     lastY = ypos;
