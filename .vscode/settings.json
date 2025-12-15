@@ -3,5 +3,13 @@
         "iostream": "cpp"
     },
     "C_Cpp.intelliSenseEngine": "disabled",
-    "clangd.enabled": true
+    "clangd.enabled": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.detectIndentation": true,
+
+    "editor.autoIndent": "advanced",
+
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "xaver.clang-format"
 }
