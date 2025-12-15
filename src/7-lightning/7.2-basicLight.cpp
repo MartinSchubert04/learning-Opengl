@@ -1,13 +1,12 @@
 #include "ext/matrix_transform.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+#define STB_IMAGE_IMPLEMENTATION
+#define SPECULAR_IN_VS
 #include <clases/Shader.h>
 #include <clases/Camera.h>
 
@@ -79,10 +78,15 @@ int main() {
 
   // build and compile our shader program
   // ------------------------------------
+#ifdef SPECULAR_IN_VS
+  Shader shader("shaders/7/2.1/color.vs", "shaders/7/2.1/color.fs");
+  Shader lightCubeShader("shaders/7/2.1/lightSource.vs",
+                         "shaders/7/2.1/lightSource.fs");
+#else
   Shader shader("shaders/7/2/color.vs", "shaders/7/2/color.fs");
   Shader lightCubeShader("shaders/7/2/lightSource.vs",
                          "shaders/7/2/lightSource.fs");
-
+#endif
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   float vertices[] = {
@@ -153,6 +157,8 @@ int main() {
 
   float cubeScalar = 2;
   bool reduceCube = false;
+  const float radius = 3.0f;
+
   while (!glfwWindowShouldClose(window)) {
     // input
     // -----
@@ -172,10 +178,18 @@ int main() {
     shader.setVec3("lightPos", lightPos);
     shader.setVec3("viewPos", camera.Position);
 
+    // rotar luz al redetor
+    // lightPos.x = sin(glfwGetTime()) * radius;
+    lightPos.y = 0;
+    lightPos.x = 0;
+    // lightPos.z = cos(glfwGetTime()) * radius;
+
     // create model matrix
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f),
-                        glm::vec3(0.5f, 1.0f, 0.0f));
+    // model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f),
+    //                     glm::vec3(0.5f, 1.0f, 0.0f));
+
+    // model = glm::rotate(model, 20.0f, glm::vec3(3.0f, 6.0f, 1.0f));
 
     reduceCube ? cubeScalar -= 0.1 *deltaTime : cubeScalar += 0.1 * deltaTime;
 
@@ -184,7 +198,7 @@ int main() {
     if (cubeScalar <= 1)
       reduceCube = false;
 
-    model = glm::scale(model, glm::vec3(cubeScalar));  // a smaller cube
+    // model = glm::scale(model, glm::vec3(cubeScalar));  // a smaller cube
 
     glm::mat4 view =
         glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
@@ -198,6 +212,7 @@ int main() {
     shader.setMat4("projection", projection);
     shader.setMat4("model", model);
     shader.setMat4("view", view);
+    shader.setVec3("lightPos", lightPos);
 
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -206,6 +221,7 @@ int main() {
     lightCubeShader.use();
     lightCubeShader.setMat4("projection", projection);
     lightCubeShader.setMat4("view", view);
+
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));  // a smaller cube
