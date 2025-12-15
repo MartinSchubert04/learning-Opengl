@@ -3,6 +3,7 @@
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+
   Position = position;
   WorldUp = up;
   Yaw = yaw;
@@ -14,6 +15,7 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY,
                float upZ, float yaw, float pitch)
     : Front(0.0f, 0.0f, -1.0f), MovementSpeed(SPEED),
       MouseSensitivity(SENSITIVITY), Zoom(ZOOM) {
+
   Position = {posX, posY, posZ};
   WorldUp = {upX, upY, upZ};
   Yaw = yaw;
@@ -35,6 +37,10 @@ void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime) {
     Position -= Right * velocity;
   if (direction == RIGHT)
     Position += Right * velocity;
+  if (direction == UP)
+    Position += WorldUp * velocity;
+  if (direction == DOWN)
+    Position -= WorldUp * velocity;
 }
 
 void Camera::ProcessMouseMovement(float xoffset, float yoffset,

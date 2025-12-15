@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // Defines several possible options for camera movement
-enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT };
+enum Camera_Movement { FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN };
 
 // Default camera values
 constexpr float YAW = -90.0f;
