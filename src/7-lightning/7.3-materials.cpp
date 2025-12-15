@@ -15,9 +15,13 @@ void processInput(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void updateFrameRate(GLFWwindow *window);
+std::vector<float> generateSphere(int xSegments, int ySegments);
+std::vector<unsigned int> getSphereIndices(int xSegments, int ySegments);
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+const float PI = 3.14159265359f;
 
 glm::vec4 const background_color = {0.2f, 0.3f, 0.3f, 1.0f};
 
@@ -130,27 +134,36 @@ int main() {
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-  // position attribute
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
-  // normal attribute
+
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
                         (void *)(3 * sizeof(float)));
   glEnableVertexAttribArray(1);
 
-  unsigned int lightCubeVAO;
+  // light sphere  ----
 
-  glGenVertexArrays(1, &lightCubeVAO);
-  glBindVertexArray(lightCubeVAO);
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
+  std::vector<float> sphereVertices = generateSphere(64, 64);
+  std::vector<unsigned int> sphereIndices = getSphereIndices(64, 64);
+  unsigned int sphereVAO, sphereVBO, sphereEBO;
 
-  // light attribute (cada VAO requiere su propio set de atributte pointer)
+  glGenVertexArrays(1, &sphereVAO);
+  glGenBuffers(1, &sphereVBO);
+  glGenBuffers(1, &sphereEBO);
+
+  glBindVertexArray(sphereVAO);
+
+  glBindBuffer(GL_ARRAY_BUFFER, sphereVBO);
+  glBufferData(GL_ARRAY_BUFFER, sphereVertices.size() * sizeof(float),
+               sphereVertices.data(), GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, sphereEBO);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+               sphereIndices.size() * sizeof(unsigned int),
+               sphereIndices.data(), GL_STATIC_DRAW);
+
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
-
-  // tell opengl for each sampler to which texture unit it belongs to (only has
-  // to be done once)
-  // -------------------------------------------------------------------------------------------
 
   // render loop
   // -----------
@@ -232,8 +245,8 @@ int main() {
     model = glm::scale(model, glm::vec3(0.2f));  // a smaller cube
     lightCubeShader.setMat4("model", model);
 
-    glBindVertexArray(lightCubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(sphereVAO);
+    glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
@@ -245,7 +258,7 @@ int main() {
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
   glDeleteVertexArrays(1, &cubeVAO);
-  glDeleteVertexArrays(1, &lightCubeVAO);
+  glDeleteVertexArrays(1, &sphereVAO);
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
 
@@ -327,4 +340,42 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
   // make sure the viewport matches the new window dimensions; note that width
   // and height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
+}
+
+std::vector<float> generateSphere(int xSegments, int ySegments) {
+  std::vector<float> vertices;
+
+  for (int y{0}; y <= ySegments; y++) {
+    for (int x{0}; x <= xSegments; x++) {
+      float xSeg = float(x) / xSegments;
+      float ySeg = float(y) / ySegments;
+
+      float xPos = std::cos(xSeg * 2.0f * PI) * std::sin(ySeg * PI);
+      float yPos = std::cos(ySeg * PI);
+      float zPos = std::sin(xSeg * 2.0f * PI) * std::sin(ySeg * PI);
+
+      vertices.push_back(xPos);
+      vertices.push_back(yPos);
+      vertices.push_back(zPos);
+    }
+  }
+
+  return vertices;
+}
+
+std::vector<unsigned int> getSphereIndices(int xSegments, int ySegments) {
+  std::vector<unsigned int> indices;
+  for (unsigned int y = 0; y < ySegments; ++y) {
+    for (unsigned int x = 0; x < xSegments; ++x) {
+      indices.push_back((y + 1) * (xSegments + 1) + x);
+      indices.push_back(y * (xSegments + 1) + x);
+      indices.push_back(y * (xSegments + 1) + x + 1);
+
+      indices.push_back((y + 1) * (xSegments + 1) + x);
+      indices.push_back(y * (xSegments + 1) + x + 1);
+      indices.push_back((y + 1) * (xSegments + 1) + x + 1);
+    }
+  }
+
+  return indices;
 }

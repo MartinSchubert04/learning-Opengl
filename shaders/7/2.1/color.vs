@@ -2,20 +2,19 @@
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 
-out vec3 FragPos;
-out vec3 Normal;
-out float spec;
+out vec3 vertexColor;
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 viewPos;
 uniform vec3 lightPos;
+uniform vec3 lightColor;
+uniform vec3 objectColor;
 
 
 void main()
 {
-    // world space
     vec3 FragPos = vec3(model * vec4(aPos, 1.0));
     vec3 Normal  = normalize(mat3(transpose(inverse(model))) * aNormal);
 
@@ -30,7 +29,7 @@ void main()
 
     // Specular (Gouraud)
     float specularStrength = 0.5;
-    float shininess = 32.0;
+    float shininess = 128.0;
 
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, Normal);
