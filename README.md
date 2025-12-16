@@ -4,7 +4,7 @@ For setup referece [here](https://github.com/MartinSchubert04/Opengl-setup)
 
 For .exe clean-up in root folder: run deleteEXE.ps1 or Ctrl+shift+P -> write "run task" enter -> write "clean EXE files" excecute that task
 
-# Compile using Cmake
+# Compile using Cmake (you need to install Ninja before "winget install Ninja-build.Ninja" in pwsh)
 
 Change the SOURCE_FILE to whatever .cpp you need to compile (it has to have a main function), verify the location for glad.c
 
