@@ -7,6 +7,7 @@ include_directories(include)
 include_directories(include/glad)
 include_directories(include/GLFW)
 include_directories(include/glm)
+include_directories(include/imgui)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
@@ -14,15 +15,28 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_SOURCE_DIR})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_SOURCE_DIR})
 
+
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 
 set(SOURCE_FILE src/7-lightning/7.3-materials.cpp)
 
+set(IMGUI_SOURCES
+    include/imgui/imgui.cpp
+    include/imgui/imgui_draw.cpp
+    include/imgui/imgui_tables.cpp
+    include/imgui/imgui_widgets.cpp
+    include/imgui/imgui_impl_glfw.cpp
+    include/imgui/imgui_impl_opengl3.cpp
+)
+
+
+
 set(SOURCES
     src/glad.c
     include/clases/Camera.cpp
+    ${IMGUI_SOURCES}
 )
 
 
@@ -34,5 +48,6 @@ add_executable(OpenGL-learn
 target_include_directories(OpenGL-learn PRIVATE include lib shaders)
 
 target_link_libraries(OpenGL-learn PRIVATE ${PROJECT_SOURCE_DIR}/lib/libglfw3.a)
+target_compile_definitions(OpenGL-learn PRIVATE IMGUI_IMPL_OPENGL_LOADER_GLAD)
 
 # target_link_libraries(OpenGL-learn ${GLFW3_LIBRARY} OpenGL::GL)
