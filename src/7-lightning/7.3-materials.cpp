@@ -1,14 +1,19 @@
-#include "ext/matrix_transform.hpp"
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#define STB_IMAGE_IMPLEMENTATION
-#define SPECULAR_IN_VS
+#include "ext/matrix_transform.hpp"
+
 #include <clases/Shader.h>
 #include <clases/Camera.h>
+#define STB_IMAGE_IMPLEMENTATION
+#define SPECULAR_IN_VS
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -63,7 +68,7 @@ int main() {
 
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
   // mouse input callbacks
   glfwSetCursorPosCallback(window, mouse_callback);
@@ -165,12 +170,22 @@ int main() {
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
-  // render loop
+  // imgui setup
   // -----------
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO &io = ImGui::GetIO();
+  (void)io;
+  ImGui::StyleColorsDark();
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init("#version 330");
 
   float cubeScalar = 2;
   bool reduceCube = false;
   const float radius = 3.0f;
+  bool rotate = true;
+  // render loop
+  // -----------
 
   while (!glfwWindowShouldClose(window)) {
     // input
@@ -182,6 +197,15 @@ int main() {
     glClearColor(background_color.r, background_color.g, background_color.b,
                  background_color.a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::Begin("Test ImGui");
+    ImGui::Text("Hello world");
+    ImGui::Checkbox("Rotate", &rotate);
+    ImGui::SliderFloat("Size", &cubeScalar, 0.1, 2);
 
     updateFrameRate(window);
 
@@ -198,8 +222,10 @@ int main() {
     // model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f),
     //                     glm::vec3(0.5f, 1.0f, 0.0f));
 
-#if 1
-    model = glm::rotate(model, 20.0f, glm::vec3(3.0f, 6.0f, 1.0f));
+    if (rotate) {
+      model = glm::rotate(model, 20.0f, glm::vec3(3.0f, 6.0f, 1.0f));
+    }
+
     // achicar cubo
     reduceCube ? cubeScalar -= 0.1 *deltaTime : cubeScalar += 0.1 * deltaTime;
     if (cubeScalar >= 2)
@@ -207,7 +233,6 @@ int main() {
     if (cubeScalar <= 1)
       reduceCube = false;
     model = glm::scale(model, glm::vec3(cubeScalar));  // a smaller cube
-#endif
 
     glm::mat4 view =
         glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
@@ -248,29 +273,27 @@ int main() {
     glBindVertexArray(sphereVAO);
     glDrawElements(GL_TRIANGLES, sphereIndices.size(), GL_UNSIGNED_INT, 0);
 
-    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
-    // etc.)
-    // -------------------------------------------------------------------------------
+    ImGui::End();
+    ImGui::Render();
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  // optional: de-allocate all resources once they've outlived their purpose:
-  // ------------------------------------------------------------------------
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+
   glDeleteVertexArrays(1, &cubeVAO);
   glDeleteVertexArrays(1, &sphereVAO);
   glDeleteBuffers(1, &VBO);
   glDeleteBuffers(1, &EBO);
 
-  // glfw: terminate, clearing all previously allocated GLFW resources.
-  // ------------------------------------------------------------------
   glfwTerminate();
   return 0;
 }
 
-// process all input: query GLFW whether relevant keys are pressed/released this
-// frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
 void processInput(GLFWwindow *window) {
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
@@ -310,8 +333,6 @@ void mouse_callback(GLFWwindow *window, double xposIn, double yposIn) {
   camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-// glfw: whenever the mouse scroll wheel scrolls, this callback is called
-// ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
   camera.ProcessMouseScroll(static_cast<float>(yoffset));
 }
