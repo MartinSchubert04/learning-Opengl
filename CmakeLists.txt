@@ -20,7 +20,7 @@ find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
 
 
-set(SOURCE_FILE src/7-lightning/7.3-materials.cpp)
+set(SOURCE_FILE src/7-lightning/7.4-lightMapping.cpp)
 
 set(IMGUI_SOURCES
     include/imgui/imgui.cpp

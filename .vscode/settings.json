@@ -11,5 +11,6 @@
     "editor.autoIndent": "advanced",
 
     "editor.formatOnSave": true,
-    "editor.defaultFormatter": "xaver.clang-format"
+    "editor.defaultFormatter": "xaver.clang-format",
+
 }
