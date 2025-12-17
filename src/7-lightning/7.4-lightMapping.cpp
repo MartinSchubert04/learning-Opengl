@@ -180,6 +180,10 @@ int main() {
   glEnableVertexAttribArray(0);
 
   unsigned int diffuseMap = loadTexture("resources/textures/container2.png");
+  unsigned int specularMap =
+      loadTexture("resources/textures/container2_specular.png");
+
+  unsigned int emisionMap = loadTexture("resources/textures/matrix.jpg");
 
   // imgui setup
   // -----------
@@ -203,6 +207,8 @@ int main() {
 
   shader.use();
   shader.setInt("material.diffuse", 0);
+  shader.setInt("material.specular", 1);
+  shader.setInt("material.emission", 2);
 
   while (!glfwWindowShouldClose(window)) {
 
@@ -301,6 +307,8 @@ int main() {
 
     shader.use();
     shader.setVec3("viewPos", camera.Position);
+    shader.setFloat("time", glfwGetTime());
+
     shader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
     shader.setFloat("material.shininess", 32.0f);
 
@@ -329,6 +337,10 @@ int main() {
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, diffuseMap);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, specularMap);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, emisionMap);
 
     glBindVertexArray(cubeVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
