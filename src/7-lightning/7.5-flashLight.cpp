@@ -93,9 +93,9 @@ int main() {
 
   // build and compile our shader program
   // ------------------------------------
-  Shader shader("shaders/7/4/color.vs", "shaders/7/4/color.fs");
-  Shader lightCubeShader("shaders/7/4/lightSource.vs",
-                         "shaders/7/4/lightSource.fs");
+  Shader shader("shaders/7/5.2/color.vs", "shaders/7/5.2/color.fs");
+  Shader lightCubeShader("shaders/7/5.2/lightSource.vs",
+                         "shaders/7/5.2/lightSource.fs");
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
@@ -204,6 +204,13 @@ int main() {
   glm::vec3 lightAmbient = {0.2f, 0.2f, 0.2f};
   glm::vec3 lightDiffuse = {0.5f, 0.5f, 0.5f};
   glm::vec3 lightSpecular = {1.0f, 1.0f, 1.0f};
+
+  glm::vec3 cubePositions[] = {
+      glm::vec3(0.0f, 0.0f, 0.0f),    glm::vec3(2.0f, 5.0f, -15.0f),
+      glm::vec3(-1.5f, -2.2f, -2.5f), glm::vec3(-3.8f, -2.0f, -12.3f),
+      glm::vec3(2.4f, -0.4f, -3.5f),  glm::vec3(-1.7f, 3.0f, -7.5f),
+      glm::vec3(1.3f, -2.0f, -2.5f),  glm::vec3(1.5f, 2.0f, -2.5f),
+      glm::vec3(1.5f, 0.2f, -1.5f),   glm::vec3(-1.3f, 1.0f, -1.5f)};
 
   shader.use();
   shader.setInt("material.diffuse", 0);
@@ -316,12 +323,24 @@ int main() {
     shader.setVec3("light.diffuse",
                    lightDiffuse);  // darken diffuse light a bit
     shader.setVec3("light.specular", lightSpecular);
-    shader.setVec3("light.position", lightPos);
 
-    glm::mat4 model = glm::mat4(1.0f);
+    shader.setVec3("light.position", camera.Position);
+    shader.setVec3("light.direction", camera.Front);
+    shader.setFloat("light.cutOffAngle", glm::cos(glm::radians(12.5f)));
+    shader.setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
 
-    model = glm::rotate(model, angle, glm::vec3(3.0f, 6.0f, 1.0f));
-    model = glm::scale(model, glm::vec3(cubeScalar));
+    glBindVertexArray(cubeVAO);
+
+    for (unsigned int i = 0; i < 10; i++) {
+      glm::mat4 model = glm::mat4(1.0f);
+      model = glm::translate(model, cubePositions[i]);
+      model = glm::rotate(model, angle, glm::vec3(3.0f, 6.0f, 1.0f));
+      model = glm::scale(model, glm::vec3(cubeScalar));
+      shader.setMat4("model", model);
+
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+
     glm::mat4 view =
         glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
 
@@ -332,7 +351,6 @@ int main() {
                          (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
     shader.setMat4("projection", projection);
-    shader.setMat4("model", model);
     shader.setMat4("view", view);
 
     glActiveTexture(GL_TEXTURE0);
@@ -341,9 +359,6 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, specularMap);
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, emisionMap);
-
-    glBindVertexArray(cubeVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     // rotar luz al redetor
     if (sphereGravitate) {
@@ -360,7 +375,7 @@ int main() {
     lightCubeShader.use();
     lightCubeShader.setMat4("projection", projection);
     lightCubeShader.setMat4("view", view);
-
+    glm::mat4 model = glm::mat4(1.0);
     model = glm::mat4(1.0f);
     model = glm::translate(model, lightPos);
     model = glm::scale(model, glm::vec3(0.2f));  // a smaller cube
