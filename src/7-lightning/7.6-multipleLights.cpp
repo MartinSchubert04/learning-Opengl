@@ -31,7 +31,7 @@ const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 700;
 const float PI = 3.14159265359f;
 
-glm::vec4 const background_color = {0.2f, 0.3f, 0.3f, 1.0f};
+glm::vec4 const background_color = {0.2f, 0.2f, 0.2f, 1.0f};
 
 float deltaTime = 0.0f;  // Time between current frame and last frame
 float lastFrame = 0.0f;  // Time of last frame
@@ -338,7 +338,7 @@ int main() {
 
     glBindVertexArray(sphereVAO);
 
-    for (unsigned int i = 0; i < pointLightPositions->length(); i++) {
+    for (unsigned int i = 0; i < 4; i++) {
       glm::mat4 model = glm::mat4(1.0);
       model = glm::mat4(1.0f);
       model = glm::translate(model, pointLightPositions[i]);
