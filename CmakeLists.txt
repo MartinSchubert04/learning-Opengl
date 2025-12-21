@@ -26,7 +26,7 @@ find_package(glfw3 CONFIG REQUIRED)
 # Sources
 # ===============================
 set(SOURCE_FILE
-    src/7-lightning/7.6-multipleLights.cpp
+    src/8-model/8-loadModel.cpp
 )
 
 set(IMGUI_SOURCES
@@ -41,6 +41,9 @@ set(IMGUI_SOURCES
 set(SOURCES
     src/glad.c
     include/clases/Camera.cpp
+    include/clases/Mesh.cpp
+    include/clases/Model.cpp
+    include/stb_image.cpp
     ${IMGUI_SOURCES}
 )
 

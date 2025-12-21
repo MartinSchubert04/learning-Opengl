@@ -9,7 +9,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "ext/matrix_transform.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <iostream>
 
