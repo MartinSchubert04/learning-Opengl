@@ -17,6 +17,7 @@ public:
 private:
   vector<Mesh> meshes;
   string directory;
+  vector<Texture> loadedTextures;
 
   void loadModel(string path);
   void processNode(aiNode *node, const aiScene *scene);
