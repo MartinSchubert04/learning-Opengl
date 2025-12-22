@@ -72,6 +72,7 @@ int main() {
 
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
   uiMode ? glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL)
          : glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
